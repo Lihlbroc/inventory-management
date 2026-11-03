@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timedelta
 from typing import List, Optional
 from pydantic import BaseModel
-from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders, restocking_orders
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -89,6 +90,9 @@ class DemandForecast(BaseModel):
     forecasted_demand: int
     trend: str
     period: str
+    unit_cost: float
+    supplier: str
+    lead_time_days: int
 
 class BacklogItem(BaseModel):
     id: str
@@ -303,6 +307,132 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+# ---------------------------------------------------------------------------
+# Restocking
+# ---------------------------------------------------------------------------
+
+class RestockingOrderItem(BaseModel):
+    sku: str
+    quantity: int
+
+class CreateRestockingOrderRequest(BaseModel):
+    items: List[RestockingOrderItem]
+
+class RestockingOrder(BaseModel):
+    id: str
+    order_number: str
+    items: List[dict]
+    total_cost: float
+    status: str
+    submitted_date: str
+    lead_time_days: int
+    expected_delivery: str
+
+# Higher rank is restocked first; decreasing-trend items are never recommended
+TREND_RANK = {'increasing': 2, 'stable': 1}
+
+def _stock_on_hand(sku: str) -> int:
+    """Stock for a SKU from inventory. Most forecast SKUs have no inventory
+    record, so a missing SKU counts as 0 and its whole forecast is the shortfall."""
+    return sum(i["quantity_on_hand"] for i in inventory_items if i["sku"] == sku)
+
+def _restock_candidates() -> list:
+    """Forecast items worth restocking, best first (trend, then largest shortfall)."""
+    candidates = []
+    for f in demand_forecasts:
+        rank = TREND_RANK.get(f["trend"])
+        shortfall = f["forecasted_demand"] - _stock_on_hand(f["item_sku"])
+        if rank is None or shortfall <= 0:
+            continue
+        candidates.append((rank, shortfall, f))
+    candidates.sort(key=lambda c: (c[0], c[1]), reverse=True)
+    return candidates
+
+@app.get("/api/restocking/recommendations")
+def get_restocking_recommendations(budget: float = 0):
+    """Recommend forecast items to restock within a budget"""
+    if budget < 0:
+        raise HTTPException(status_code=400, detail="Budget must not be negative")
+
+    remaining = budget
+    items = []
+    full_cost = 0.0  # cost of covering every shortfall; the UI uses it as the slider max
+    for _, shortfall, f in _restock_candidates():
+        full_cost += shortfall * f["unit_cost"]
+        # Greedy fill in priority order: buy the whole shortfall if it fits,
+        # otherwise the largest whole quantity the remaining budget affords.
+        # Later (cheaper) items can still fit after a partial buy, so no break.
+        quantity = min(shortfall, int(remaining // f["unit_cost"]))
+        if quantity <= 0:
+            continue
+        line_cost = round(quantity * f["unit_cost"], 2)
+        remaining -= line_cost
+        items.append({
+            "sku": f["item_sku"],
+            "name": f["item_name"],
+            "trend": f["trend"],
+            "shortfall": shortfall,
+            "quantity": quantity,
+            "unit_cost": f["unit_cost"],
+            "line_cost": line_cost,
+            "supplier": f["supplier"],
+            "lead_time_days": f["lead_time_days"],
+        })
+
+    total_cost = round(sum(i["line_cost"] for i in items), 2)
+    return {
+        "budget": budget,
+        "items": items,
+        "total_cost": total_cost,
+        "remaining_budget": round(budget - total_cost, 2),
+        "full_cost": round(full_cost, 2),
+    }
+
+@app.post("/api/restocking-orders", response_model=RestockingOrder, status_code=201)
+def create_restocking_order(request: CreateRestockingOrderRequest):
+    """Submit a restocking order. Prices and lead times come from the server's
+    forecast data, never from the client."""
+    if not request.items:
+        raise HTTPException(status_code=400, detail="Order must contain at least one item")
+
+    forecasts = {f["item_sku"]: f for f in demand_forecasts}
+    lines = []
+    for item in request.items:
+        forecast = forecasts.get(item.sku)
+        if forecast is None:
+            raise HTTPException(status_code=400, detail=f"Unknown SKU: {item.sku}")
+        if item.quantity <= 0:
+            raise HTTPException(status_code=400, detail=f"Quantity must be positive for {item.sku}")
+        lines.append({
+            "sku": item.sku,
+            "name": forecast["item_name"],
+            "quantity": item.quantity,
+            "unit_cost": forecast["unit_cost"],
+            "supplier": forecast["supplier"],
+            "lead_time_days": forecast["lead_time_days"],
+        })
+
+    now = datetime.now()
+    # The slowest item gates delivery of the whole order
+    lead_time = max(l["lead_time_days"] for l in lines)
+    order = {
+        "id": str(len(restocking_orders) + 1),
+        "order_number": f"RST-{now.year}-{len(restocking_orders) + 1:04d}",
+        "items": lines,
+        "total_cost": round(sum(l["quantity"] * l["unit_cost"] for l in lines), 2),
+        "status": "Submitted",
+        "submitted_date": now.isoformat(timespec="seconds"),
+        "lead_time_days": lead_time,
+        "expected_delivery": (now + timedelta(days=lead_time)).isoformat(timespec="seconds"),
+    }
+    restocking_orders.append(order)
+    return order
+
+@app.get("/api/restocking-orders", response_model=List[RestockingOrder])
+def get_restocking_orders():
+    """List submitted restocking orders, newest first"""
+    return list(reversed(restocking_orders))
 
 # ---------------------------------------------------------------------------
 # Tasks
