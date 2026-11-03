@@ -14,6 +14,15 @@ sys.path.insert(0, str(server_path))
 from main import app
 
 
+@pytest.fixture(autouse=True)
+def reset_tasks():
+    """Tasks live in a module-level list in main; clear it so tests stay independent."""
+    import main
+    main.tasks.clear()
+    yield
+    main.tasks.clear()
+
+
 @pytest.fixture
 def client():
     """Create a test client for the FastAPI application."""

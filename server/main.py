@@ -304,6 +304,77 @@ def get_monthly_trends():
     result.sort(key=lambda x: x['month'])
     return result
 
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+class Task(BaseModel):
+    id: int
+    title: str
+    priority: str  # high | medium | low
+    dueDate: str   # camelCase to match the client's task objects
+    status: str    # pending | completed
+
+class CreateTaskRequest(BaseModel):
+    title: str
+    priority: str = "medium"
+    dueDate: str
+
+# In-memory like the rest of the data. IDs start at 1000 because the client
+# merges its own hard-coded tasks (ids 1-4) with these and App.vue decides
+# whether a task is local or from the API by id, so the ranges must not overlap.
+tasks: List[dict] = []
+_next_task_id = 1000
+
+@app.get("/api/tasks", response_model=List[Task])
+def get_tasks():
+    """List tasks, newest first (the client prepends new tasks the same way)"""
+    return list(reversed(tasks))
+
+@app.post("/api/tasks", response_model=Task, status_code=201)
+def create_task(request: CreateTaskRequest):
+    """Create a pending task"""
+    global _next_task_id
+    title = request.title.strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Title must not be empty")
+    if request.priority not in ("high", "medium", "low"):
+        raise HTTPException(status_code=400, detail="Priority must be high, medium or low")
+    try:
+        datetime.strptime(request.dueDate, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="dueDate must be YYYY-MM-DD")
+
+    task = {
+        "id": _next_task_id,
+        "title": title,
+        "priority": request.priority,
+        "dueDate": request.dueDate,
+        "status": "pending",
+    }
+    _next_task_id += 1
+    tasks.append(task)
+    return task
+
+def _find_task(task_id: int) -> dict:
+    for task in tasks:
+        if task["id"] == task_id:
+            return task
+    raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+
+@app.patch("/api/tasks/{task_id}", response_model=Task)
+def toggle_task(task_id: int):
+    """Toggle a task between pending and completed"""
+    task = _find_task(task_id)
+    task["status"] = "pending" if task["status"] == "completed" else "completed"
+    return task
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: int):
+    """Delete a task"""
+    tasks.remove(_find_task(task_id))
+    return {"message": f"Task {task_id} deleted"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
