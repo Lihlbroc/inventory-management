@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const f=JSON.parse(require('fs').readFileSync(0,'utf8')).tool_input?.file_path||'';if(/[\\\\\\\\/]client[\\\\\\\\/].*\\.(js|vue|css|json|html|md)$/.test(f)&&!/node_modules/.test(f))require('child_process').spawnSync('npx',['prettier','--write',f],{cwd:'client',shell:true,stdio:'ignore'})\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
