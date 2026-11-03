@@ -1,0 +1,43 @@
+name: Claude Code Review
+
+# Automated review on every new PR (and when new commits are pushed to it).
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  claude-review:
+    # Skip drafts until they are marked ready
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # post review comments
+      issues: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          # Set ANTHROPIC_API_KEY in Settings > Secrets and variables > Actions
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Review this pull request for:
+            - Correctness bugs and unhandled edge cases
+            - Code quality and adherence to the conventions in CLAUDE.md
+            - Missing or inadequate test coverage
+            - Security concerns (this repository is public, so flag any
+              credentials, internal hostnames or private registry URLs)
+
+            Be constructive and concise. Use inline comments for specific
+            issues and a single top-level comment for the overall summary.
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
