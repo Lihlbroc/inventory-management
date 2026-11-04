@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
 
@@ -119,6 +119,26 @@ class CreatePurchaseOrderRequest(BaseModel):
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+# Task field names (dueDate) are camelCase on purpose: the frontend TasksModal
+# sends and reads them as-is, so there is no snake_case translation layer.
+class Task(BaseModel):
+    id: int
+    title: str
+    priority: Literal["low", "medium", "high"]
+    dueDate: str
+    status: Literal["pending", "completed"] = "pending"
+
+class CreateTaskRequest(BaseModel):
+    title: str
+    priority: Literal["low", "medium", "high"] = "medium"
+    dueDate: str
+
+# In-memory task store (resets on restart, like the rest of the mock data).
+# The frontend also shows built-in tasks with ids 1-4 from useAuth.js and checks
+# those first on delete/toggle, so ids here start at 1001 to never collide.
+tasks: List[dict] = []
+_next_task_id = 1001
 
 # API endpoints
 @app.get("/")
@@ -303,6 +323,48 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/tasks", response_model=List[Task])
+def get_tasks():
+    """Get all API-created tasks, newest first."""
+    return tasks
+
+@app.post("/api/tasks", response_model=Task, status_code=201)
+def create_task(request: CreateTaskRequest):
+    """Create a task. New tasks start as 'pending' and are listed first."""
+    global _next_task_id
+    title = request.title.strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Task title cannot be empty")
+
+    task = {
+        "id": _next_task_id,
+        "title": title,
+        "priority": request.priority,
+        "dueDate": request.dueDate,
+        "status": "pending",
+    }
+    _next_task_id += 1
+    tasks.insert(0, task)
+    return task
+
+@app.patch("/api/tasks/{task_id}", response_model=Task)
+def toggle_task(task_id: int):
+    """Toggle a task between 'pending' and 'completed'."""
+    for task in tasks:
+        if task["id"] == task_id:
+            task["status"] = "completed" if task["status"] == "pending" else "pending"
+            return task
+    raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: int):
+    """Delete a task."""
+    for index, task in enumerate(tasks):
+        if task["id"] == task_id:
+            tasks.pop(index)
+            return {"message": f"Task {task_id} deleted"}
+    raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
 
 if __name__ == "__main__":
     import uvicorn
