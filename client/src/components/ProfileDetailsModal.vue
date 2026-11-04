@@ -7,7 +7,12 @@
             <h3 class="modal-title">{{ t('profileDetails.title') }}</h3>
             <button class="close-button" @click="close">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path
+                  d="M15 5L5 15M5 5L15 15"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
               </svg>
             </button>
           </div>
@@ -29,12 +34,16 @@
                 </div>
 
                 <div class="info-item">
-                  <div class="info-label">{{ t('profileDetails.department') }}</div>
+                  <div class="info-label">
+                    {{ t('profileDetails.department') }}
+                  </div>
                   <div class="info-value">{{ currentUser.department }}</div>
                 </div>
 
                 <div class="info-item">
-                  <div class="info-label">{{ t('profileDetails.location') }}</div>
+                  <div class="info-label">
+                    {{ t('profileDetails.location') }}
+                  </div>
                   <div class="info-value">{{ currentUser.location }}</div>
                 </div>
 
@@ -44,20 +53,30 @@
                 </div>
 
                 <div class="info-item">
-                  <div class="info-label">{{ t('profileDetails.joinDate') }}</div>
-                  <div class="info-value">{{ formatDate(currentUser.joinDate) }}</div>
+                  <div class="info-label">
+                    {{ t('profileDetails.joinDate') }}
+                  </div>
+                  <div class="info-value">
+                    {{ formatDate(currentUser.joinDate) }}
+                  </div>
                 </div>
 
                 <div class="info-item">
-                  <div class="info-label">{{ t('profileDetails.employeeId') }}</div>
-                  <div class="info-value">CC-{{ currentUser.id.toString().padStart(5, '0') }}</div>
+                  <div class="info-label">
+                    {{ t('profileDetails.employeeId') }}
+                  </div>
+                  <div class="info-value">
+                    CC-{{ currentUser.id.toString().padStart(5, '0') }}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="modal-footer">
-            <button class="btn-secondary" @click="close">{{ t('profileDetails.close') }}</button>
+            <button class="btn-secondary" @click="close">
+              {{ t('profileDetails.close') }}
+            </button>
           </div>
         </div>
       </div>

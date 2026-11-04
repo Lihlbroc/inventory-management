@@ -7,7 +7,12 @@
             <h3 class="modal-title">{{ t('tasks.title') }}</h3>
             <button class="close-button" @click="close">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path
+                  d="M15 5L5 15M5 5L15 15"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
               </svg>
             </button>
           </div>
@@ -54,7 +59,11 @@
                 </div>
 
                 <div class="form-group-btn">
-                  <button @click="handleAddTask" class="task-add-btn" :disabled="!newTask.title.trim() || !newTask.dueDate">
+                  <button
+                    @click="handleAddTask"
+                    class="task-add-btn"
+                    :disabled="!newTask.title.trim() || !newTask.dueDate"
+                  >
                     {{ t('tasks.addTask') }}
                   </button>
                 </div>
@@ -73,7 +82,10 @@
                 v-for="task in sortedTasks"
                 :key="task.id"
                 class="task-item"
-                :class="[`priority-${task.priority}`, { completed: task.status === 'completed' }]"
+                :class="[
+                  `priority-${task.priority}`,
+                  { completed: task.status === 'completed' }
+                ]"
               >
                 <div class="task-header">
                   <div class="task-check-title">
@@ -83,9 +95,17 @@
                       @change="$emit('toggle-task', task.id)"
                       class="task-checkbox"
                     />
-                    <span class="task-title" @click="$emit('toggle-task', task.id)">{{ task.title }}</span>
+                    <span
+                      class="task-title"
+                      @click="$emit('toggle-task', task.id)"
+                      >{{ task.title }}</span
+                    >
                   </div>
-                  <button @click="$emit('delete-task', task.id)" class="task-delete-btn" title="Delete task">
+                  <button
+                    @click="$emit('delete-task', task.id)"
+                    class="task-delete-btn"
+                    title="Delete task"
+                  >
                     ×
                   </button>
                 </div>
@@ -96,12 +116,28 @@
                   </span>
                   <div class="task-due-date">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <rect x="2" y="3" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/>
-                      <path d="M4.5 1.5V4.5M9.5 1.5V4.5M2 6H12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                      <rect
+                        x="2"
+                        y="3"
+                        width="10"
+                        height="9"
+                        rx="1"
+                        stroke="currentColor"
+                        stroke-width="1.2"
+                      />
+                      <path
+                        d="M4.5 1.5V4.5M9.5 1.5V4.5M2 6H12"
+                        stroke="currentColor"
+                        stroke-width="1.2"
+                        stroke-linecap="round"
+                      />
                     </svg>
                     {{ formatDueDate(task.dueDate) }}
                   </div>
-                  <span class="status-badge" :class="getStatusClass(task.dueDate, task.status)">
+                  <span
+                    class="status-badge"
+                    :class="getStatusClass(task.dueDate, task.status)"
+                  >
                     {{ getStatusText(task.dueDate, task.status) }}
                   </span>
                 </div>
@@ -110,7 +146,9 @@
           </div>
 
           <div class="modal-footer">
-            <button class="btn-secondary" @click="close">{{ t('profileDetails.close') }}</button>
+            <button class="btn-secondary" @click="close">
+              {{ t('profileDetails.close') }}
+            </button>
           </div>
         </div>
       </div>
@@ -182,8 +220,12 @@ export default {
       if (diffDays === 0) return isJapanese ? '今日' : 'today'
       if (diffDays === 1) return isJapanese ? '明日' : 'tomorrow'
       if (diffDays === -1) return isJapanese ? '昨日' : 'yesterday'
-      if (diffDays < 0) return isJapanese ? `${Math.abs(diffDays)}日前` : `${Math.abs(diffDays)} days ago`
-      if (diffDays < 7) return isJapanese ? `${diffDays}日後` : `in ${diffDays} days`
+      if (diffDays < 0)
+        return isJapanese
+          ? `${Math.abs(diffDays)}日前`
+          : `${Math.abs(diffDays)} days ago`
+      if (diffDays < 7)
+        return isJapanese ? `${diffDays}日後` : `in ${diffDays} days`
 
       const locale = isJapanese ? 'ja-JP' : 'en-US'
       return date.toLocaleDateString(locale, {
@@ -216,15 +258,16 @@ export default {
 
       const statusClass = getStatusClass(dueDate, status)
       if (statusClass === 'overdue') return isJapanese ? '期限超過' : 'Overdue'
-      if (statusClass === 'urgent') return isJapanese ? 'もうすぐ期限' : 'Due Soon'
+      if (statusClass === 'urgent')
+        return isJapanese ? 'もうすぐ期限' : 'Due Soon'
       return isJapanese ? '予定' : 'Upcoming'
     }
 
     const translatePriority = (priority) => {
       const priorityMap = {
-        'high': t('priority.high'),
-        'medium': t('priority.medium'),
-        'low': t('priority.low')
+        high: t('priority.high'),
+        medium: t('priority.medium'),
+        low: t('priority.low')
       }
       return priorityMap[priority] || priority
     }
@@ -404,7 +447,9 @@ label {
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
   white-space: nowrap;
   height: fit-content;
 }

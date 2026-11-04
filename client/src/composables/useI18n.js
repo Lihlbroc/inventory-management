@@ -76,7 +76,10 @@ export function useI18n() {
 
   // Translate product names
   const translateProductName = (productName) => {
-    if (currentLocale.value === 'ja' && translations.ja.productNames[productName]) {
+    if (
+      currentLocale.value === 'ja' &&
+      translations.ja.productNames[productName]
+    ) {
       return translations.ja.productNames[productName]
     }
     return productName
@@ -84,7 +87,10 @@ export function useI18n() {
 
   // Translate customer names
   const translateCustomerName = (customerName) => {
-    if (currentLocale.value === 'ja' && translations.ja.customerNames[customerName]) {
+    if (
+      currentLocale.value === 'ja' &&
+      translations.ja.customerNames[customerName]
+    ) {
       return translations.ja.customerNames[customerName]
     }
     return customerName
@@ -96,8 +102,8 @@ export function useI18n() {
       // Handle city names
       const cityMap = {
         'San Francisco': 'サンフランシスコ',
-        'London': 'ロンドン',
-        'Tokyo': '東京'
+        London: 'ロンドン',
+        Tokyo: '東京'
       }
 
       if (cityMap[warehouseName]) {

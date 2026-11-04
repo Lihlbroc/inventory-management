@@ -26,7 +26,9 @@
             </thead>
             <tbody>
               <tr v-for="(q, index) in quarterlyData" :key="index">
-                <td><strong>{{ q.quarter }}</strong></td>
+                <td>
+                  <strong>{{ q.quarter }}</strong>
+                </td>
                 <td>{{ q.total_orders }}</td>
                 <td>${{ formatNumber(q.total_revenue) }}</td>
                 <td>${{ formatNumber(q.avg_order_value) }}</td>
@@ -48,7 +50,11 @@
         </div>
         <div class="chart-container">
           <div class="bar-chart">
-            <div v-for="(month, index) in monthlyData" :key="index" class="bar-wrapper">
+            <div
+              v-for="(month, index) in monthlyData"
+              :key="index"
+              class="bar-wrapper"
+            >
               <div class="bar-container">
                 <div
                   class="bar"
@@ -80,18 +86,46 @@
             </thead>
             <tbody>
               <tr v-for="(month, index) in monthlyData" :key="index">
-                <td><strong>{{ formatMonth(month.month) }}</strong></td>
+                <td>
+                  <strong>{{ formatMonth(month.month) }}</strong>
+                </td>
                 <td>{{ month.order_count }}</td>
                 <td>${{ formatNumber(month.revenue) }}</td>
                 <td>
-                  <span v-if="index > 0" :class="getChangeClass(month.revenue, monthlyData[index - 1].revenue)">
-                    {{ getChangeValue(month.revenue, monthlyData[index - 1].revenue) }}
+                  <span
+                    v-if="index > 0"
+                    :class="
+                      getChangeClass(
+                        month.revenue,
+                        monthlyData[index - 1].revenue
+                      )
+                    "
+                  >
+                    {{
+                      getChangeValue(
+                        month.revenue,
+                        monthlyData[index - 1].revenue
+                      )
+                    }}
                   </span>
                   <span v-else>-</span>
                 </td>
                 <td>
-                  <span v-if="index > 0" :class="getChangeClass(month.revenue, monthlyData[index - 1].revenue)">
-                    {{ getGrowthRate(month.revenue, monthlyData[index - 1].revenue) }}
+                  <span
+                    v-if="index > 0"
+                    :class="
+                      getChangeClass(
+                        month.revenue,
+                        monthlyData[index - 1].revenue
+                      )
+                    "
+                  >
+                    {{
+                      getGrowthRate(
+                        month.revenue,
+                        monthlyData[index - 1].revenue
+                      )
+                    }}
                   </span>
                   <span v-else>-</span>
                 </td>
@@ -153,13 +187,17 @@ export default {
 
         // Fetch quarterly data
         console.log('Fetching quarterly data...')
-        const quarterlyResponse = await axios.get('http://localhost:8001/api/reports/quarterly')
+        const quarterlyResponse = await axios.get(
+          'http://localhost:8001/api/reports/quarterly'
+        )
         this.quarterlyData = quarterlyResponse.data
         console.log('Quarterly data:', this.quarterlyData)
 
         // Fetch monthly data
         console.log('Fetching monthly data...')
-        const monthlyResponse = await axios.get('http://localhost:8001/api/reports/monthly-trends')
+        const monthlyResponse = await axios.get(
+          'http://localhost:8001/api/reports/monthly-trends'
+        )
         this.monthlyData = monthlyResponse.data
         console.log('Monthly data:', this.monthlyData)
 
@@ -167,7 +205,6 @@ export default {
         console.log('Calculating summary stats...')
         this.calculateSummaryStats()
         console.log('Summary stats calculated')
-
       } catch (err) {
         console.log('Error loading reports:', err)
         this.error = 'Failed to load reports: ' + err.message
@@ -246,7 +283,20 @@ export default {
       var year = parts[0]
       var month = parts[1]
 
-      var monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      var monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ]
       var monthIndex = parseInt(month) - 1
 
       return monthNames[monthIndex] + ' ' + year

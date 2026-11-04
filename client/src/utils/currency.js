@@ -11,7 +11,11 @@ export function formatCurrency(amount, currency = 'USD') {
   return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
-export function formatCurrencyWithDecimals(amount, currency = 'USD', decimals = 0) {
+export function formatCurrencyWithDecimals(
+  amount,
+  currency = 'USD',
+  decimals = 0
+) {
   if (currency === 'JPY') {
     const yenAmount = Math.round(amount * USD_TO_JPY)
     return `¥${yenAmount.toLocaleString('ja-JP')}`

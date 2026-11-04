@@ -11,52 +11,81 @@
       <div class="stats-grid">
         <div class="stat-card success">
           <div class="stat-label">{{ t('status.delivered') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Delivered').length }}</div>
+          <div class="stat-value">
+            {{ getOrdersByStatus('Delivered').length }}
+          </div>
         </div>
         <div class="stat-card info">
           <div class="stat-label">{{ t('status.shipped') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Shipped').length }}</div>
+          <div class="stat-value">
+            {{ getOrdersByStatus('Shipped').length }}
+          </div>
         </div>
         <div class="stat-card warning">
           <div class="stat-label">{{ t('status.processing') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Processing').length }}</div>
+          <div class="stat-value">
+            {{ getOrdersByStatus('Processing').length }}
+          </div>
         </div>
         <div class="stat-card danger">
           <div class="stat-label">{{ t('status.backordered') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Backordered').length }}</div>
+          <div class="stat-value">
+            {{ getOrdersByStatus('Backordered').length }}
+          </div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
+          <h3 class="card-title">
+            {{ t('orders.allOrders') }} ({{ orders.length }})
+          </h3>
         </div>
         <div class="table-container">
           <table class="orders-table">
             <thead>
               <tr>
-                <th class="col-order-number">{{ t('orders.table.orderNumber') }}</th>
+                <th class="col-order-number">
+                  {{ t('orders.table.orderNumber') }}
+                </th>
                 <th class="col-customer">{{ t('orders.table.customer') }}</th>
                 <th class="col-items">{{ t('orders.table.items') }}</th>
                 <th class="col-status">{{ t('orders.table.status') }}</th>
                 <th class="col-date">{{ t('orders.table.orderDate') }}</th>
-                <th class="col-date">{{ t('orders.table.expectedDelivery') }}</th>
+                <th class="col-date">
+                  {{ t('orders.table.expectedDelivery') }}
+                </th>
                 <th class="col-value">{{ t('orders.table.totalValue') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="order in orders" :key="order.id">
-                <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
-                <td class="col-customer">{{ translateCustomerName(order.customer) }}</td>
+                <td class="col-order-number">
+                  <strong>{{ order.order_number }}</strong>
+                </td>
+                <td class="col-customer">
+                  {{ translateCustomerName(order.customer) }}
+                </td>
                 <td class="col-items">
                   <details class="items-details">
                     <summary class="items-summary">
-                      {{ t('orders.itemsCount', { count: order.items.length }) }}
+                      {{
+                        t('orders.itemsCount', { count: order.items.length })
+                      }}
                     </summary>
                     <div class="items-dropdown">
-                      <div v-for="(item, idx) in order.items" :key="idx" class="item-entry">
-                        <span class="item-name">{{ translateProductName(item.name) }}</span>
-                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ currencySymbol }}{{ item.unit_price }}</span>
+                      <div
+                        v-for="(item, idx) in order.items"
+                        :key="idx"
+                        class="item-entry"
+                      >
+                        <span class="item-name">{{
+                          translateProductName(item.name)
+                        }}</span>
+                        <span class="item-meta"
+                          >{{ t('orders.quantity') }}: {{ item.quantity }} @
+                          {{ currencySymbol }}{{ item.unit_price }}</span
+                        >
                       </div>
                     </div>
                   </details>
@@ -67,8 +96,15 @@
                   </span>
                 </td>
                 <td class="col-date">{{ formatDate(order.order_date) }}</td>
-                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
-                <td class="col-value"><strong>{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</strong></td>
+                <td class="col-date">
+                  {{ formatDate(order.expected_delivery) }}
+                </td>
+                <td class="col-value">
+                  <strong
+                    >{{ currencySymbol
+                    }}{{ order.total_value.toLocaleString() }}</strong
+                  >
+                </td>
               </tr>
             </tbody>
           </table>
@@ -87,7 +123,8 @@ import { useI18n } from '../composables/useI18n'
 export default {
   name: 'Orders',
   setup() {
-    const { t, currentCurrency, translateProductName, translateCustomerName } = useI18n()
+    const { t, currentCurrency, translateProductName, translateCustomerName } =
+      useI18n()
 
     const currencySymbol = computed(() => {
       return currentCurrency.value === 'JPY' ? '¥' : '$'
@@ -125,20 +162,23 @@ export default {
     }
 
     // Watch for filter changes and reload data
-    watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], () => {
-      loadOrders()
-    })
+    watch(
+      [selectedPeriod, selectedLocation, selectedCategory, selectedStatus],
+      () => {
+        loadOrders()
+      }
+    )
 
     const getOrdersByStatus = (status) => {
-      return orders.value.filter(order => order.status === status)
+      return orders.value.filter((order) => order.status === status)
     }
 
     const getOrderStatusClass = (status) => {
       const statusMap = {
-        'Delivered': 'success',
-        'Shipped': 'info',
-        'Processing': 'warning',
-        'Backordered': 'danger'
+        Delivered: 'success',
+        Shipped: 'info',
+        Processing: 'warning',
+        Backordered: 'danger'
       }
       return statusMap[status] || 'info'
     }
@@ -247,7 +287,9 @@ export default {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 0.75rem;
   z-index: 10;
   min-width: 300px;

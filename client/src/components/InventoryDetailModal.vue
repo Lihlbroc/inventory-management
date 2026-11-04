@@ -7,7 +7,12 @@
             <h3 class="modal-title">Inventory Item Details</h3>
             <button class="close-button" @click="close">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path
+                  d="M15 5L5 15M5 5L15 15"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
               </svg>
             </button>
           </div>
@@ -16,13 +21,33 @@
             <div class="item-header">
               <div class="item-icon" :class="getStockIconClass()">
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-                  <rect x="8" y="12" width="32" height="28" rx="2" stroke="currentColor" stroke-width="2.5"/>
-                  <path d="M16 8V16M32 8V16M8 20H40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                  <path d="M16 28H32M16 34H24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                  <rect
+                    x="8"
+                    y="12"
+                    width="32"
+                    height="28"
+                    rx="2"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  />
+                  <path
+                    d="M16 8V16M32 8V16M8 20H40"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M16 28H32M16 34H24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
                 </svg>
               </div>
               <div class="item-title-section">
-                <h4 class="item-name">{{ translateProductName(inventoryItem.name) }}</h4>
+                <h4 class="item-name">
+                  {{ translateProductName(inventoryItem.name) }}
+                </h4>
                 <div class="item-sku">SKU: {{ inventoryItem.sku }}</div>
               </div>
               <span class="stock-badge" :class="getStockStatusClass()">
@@ -33,7 +58,9 @@
             <div class="stock-summary">
               <div class="summary-card primary">
                 <div class="summary-label">Quantity on Hand</div>
-                <div class="summary-value">{{ inventoryItem.quantity_on_hand }} units</div>
+                <div class="summary-value">
+                  {{ inventoryItem.quantity_on_hand }} units
+                </div>
               </div>
               <div class="summary-card" :class="getSummaryCardClass()">
                 <div class="summary-label">Stock Level</div>
@@ -55,33 +82,57 @@
 
               <div class="info-item">
                 <div class="info-label">Reorder Point</div>
-                <div class="info-value">{{ inventoryItem.reorder_point }} units</div>
+                <div class="info-value">
+                  {{ inventoryItem.reorder_point }} units
+                </div>
               </div>
 
               <div class="info-item">
                 <div class="info-label">Units Remaining</div>
                 <div class="info-value">
-                  <span :style="{ color: inventoryItem.quantity_on_hand <= inventoryItem.reorder_point ? '#ef4444' : '#10b981' }">
-                    {{ inventoryItem.quantity_on_hand - inventoryItem.reorder_point }} units
+                  <span
+                    :style="{
+                      color:
+                        inventoryItem.quantity_on_hand <=
+                        inventoryItem.reorder_point
+                          ? '#ef4444'
+                          : '#10b981'
+                    }"
+                  >
+                    {{
+                      inventoryItem.quantity_on_hand -
+                      inventoryItem.reorder_point
+                    }}
+                    units
                   </span>
                 </div>
               </div>
 
               <div class="info-item">
                 <div class="info-label">Unit Cost</div>
-                <div class="info-value">{{ currencySymbol }}{{ inventoryItem.unit_cost.toFixed(2) }}</div>
+                <div class="info-value">
+                  {{ currencySymbol }}{{ inventoryItem.unit_cost.toFixed(2) }}
+                </div>
               </div>
 
               <div class="info-item">
                 <div class="info-label">Total Value</div>
                 <div class="info-value total-value">
-                  {{ currencySymbol }}{{ totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
+                  {{ currencySymbol
+                  }}{{
+                    totalValue.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })
+                  }}
                 </div>
               </div>
 
               <div class="info-item">
                 <div class="info-label">Warehouse</div>
-                <div class="info-value">{{ translateWarehouse(inventoryItem.location) }}</div>
+                <div class="info-value">
+                  {{ translateWarehouse(inventoryItem.location) }}
+                </div>
               </div>
 
               <div class="info-item">
@@ -134,7 +185,10 @@ const totalValue = computed(() => {
 
 const stockPercentage = computed(() => {
   if (!props.inventoryItem || props.inventoryItem.reorder_point === 0) return 0
-  return Math.round((props.inventoryItem.quantity_on_hand / props.inventoryItem.reorder_point) * 100)
+  return Math.round(
+    (props.inventoryItem.quantity_on_hand / props.inventoryItem.reorder_point) *
+      100
+  )
 })
 
 const close = () => {
@@ -143,9 +197,14 @@ const close = () => {
 
 const getStockStatus = () => {
   if (!props.inventoryItem) return 'Unknown'
-  if (props.inventoryItem.quantity_on_hand <= props.inventoryItem.reorder_point) {
+  if (
+    props.inventoryItem.quantity_on_hand <= props.inventoryItem.reorder_point
+  ) {
     return 'Low Stock'
-  } else if (props.inventoryItem.quantity_on_hand <= props.inventoryItem.reorder_point * 1.5) {
+  } else if (
+    props.inventoryItem.quantity_on_hand <=
+    props.inventoryItem.reorder_point * 1.5
+  ) {
     return 'Adequate'
   } else {
     return 'In Stock'

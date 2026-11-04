@@ -10,19 +10,34 @@
           <router-link to="/" :class="{ active: $route.path === '/' }">
             {{ t('nav.overview') }}
           </router-link>
-          <router-link to="/inventory" :class="{ active: $route.path === '/inventory' }">
+          <router-link
+            to="/inventory"
+            :class="{ active: $route.path === '/inventory' }"
+          >
             {{ t('nav.inventory') }}
           </router-link>
-          <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
+          <router-link
+            to="/orders"
+            :class="{ active: $route.path === '/orders' }"
+          >
             {{ t('nav.orders') }}
           </router-link>
-          <router-link to="/spending" :class="{ active: $route.path === '/spending' }">
+          <router-link
+            to="/spending"
+            :class="{ active: $route.path === '/spending' }"
+          >
             {{ t('nav.finance') }}
           </router-link>
-          <router-link to="/demand" :class="{ active: $route.path === '/demand' }">
+          <router-link
+            to="/demand"
+            :class="{ active: $route.path === '/demand' }"
+          >
             {{ t('nav.demandForecast') }}
           </router-link>
-          <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
+          <router-link
+            to="/reports"
+            :class="{ active: $route.path === '/reports' }"
+          >
             Reports
           </router-link>
         </nav>
@@ -107,18 +122,20 @@ export default {
     const deleteTask = async (taskId) => {
       try {
         // Check if it's a mock task (from currentUser)
-        const isMockTask = currentUser.value.tasks.some(t => t.id === taskId)
+        const isMockTask = currentUser.value.tasks.some((t) => t.id === taskId)
 
         if (isMockTask) {
           // Remove from mock tasks
-          const index = currentUser.value.tasks.findIndex(t => t.id === taskId)
+          const index = currentUser.value.tasks.findIndex(
+            (t) => t.id === taskId
+          )
           if (index !== -1) {
             currentUser.value.tasks.splice(index, 1)
           }
         } else {
           // Remove from API tasks
           await api.deleteTask(taskId)
-          apiTasks.value = apiTasks.value.filter(t => t.id !== taskId)
+          apiTasks.value = apiTasks.value.filter((t) => t.id !== taskId)
         }
       } catch (err) {
         console.error('Failed to delete task:', err)
@@ -128,15 +145,16 @@ export default {
     const toggleTask = async (taskId) => {
       try {
         // Check if it's a mock task (from currentUser)
-        const mockTask = currentUser.value.tasks.find(t => t.id === taskId)
+        const mockTask = currentUser.value.tasks.find((t) => t.id === taskId)
 
         if (mockTask) {
           // Toggle mock task status
-          mockTask.status = mockTask.status === 'pending' ? 'completed' : 'pending'
+          mockTask.status =
+            mockTask.status === 'pending' ? 'completed' : 'pending'
         } else {
           // Toggle API task
           const updatedTask = await api.toggleTask(taskId)
-          const index = apiTasks.value.findIndex(t => t.id === taskId)
+          const index = apiTasks.value.findIndex((t) => t.id === taskId)
           if (index !== -1) {
             apiTasks.value[index] = updatedTask
           }
@@ -169,7 +187,16 @@ export default {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif;
   background: #f8fafc;
   color: #1e293b;
   -webkit-font-smoothing: antialiased;
